@@ -26,6 +26,7 @@ extern uint8_t is_master;
 // entirely and just use numbers.
 enum layer_number {
     _QWERTY = 0,
+    _EUCALYN,
     _LOWER,
     _RAISE,
     _ADJUST
@@ -33,6 +34,7 @@ enum layer_number {
 
 enum custom_keycodes {
   QWERTY = SAFE_RANGE,
+  EUCALYN,
   LOWER,
   RAISE,
   ADJUST,
@@ -72,6 +74,24 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       KC_LCTL, KC_A,   KC_S,    KC_D,    KC_F,  KC_G,                  KC_H,  KC_J, KC_K,    KC_L,    KC_SCLN, KC_QUOT, \
       KC_LSFT, KC_Z,   KC_X,    KC_C,    KC_V,  KC_B,                  KC_N,  KC_M, KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT, \
       ADJUST,  KC_ESC, KC_LALT, KC_LGUI, EISU,  LOWER, KC_SPC, KC_ENT, RAISE, KANA, _______, _______, _______, _______  \
+      ),
+
+  /* Eucalyn
+   * ,-----------------------------------------.             ,-----------------------------------------.
+   * | Tab  |   Q  |   W  |   ,  |   .  |   ;  |             |   M  |   R  |   D  |   Y  |   P  | Bksp |
+   * |------+------+------+------+------+------|             |------+------+------+------+------+------|
+   * | Ctrl |   A  |   O  |   E  |   I  |   U  |             |   G  |   T  |   K  |   S  |   N  |  '   |
+   * |------+------+------+------+------+------|             |------+------+------+------+------+------|
+   * | Shift|   Z  |   X  |   C  |   V  |   F  |             |   B  |   H  |   J  |   L  |   /  | Shift|
+   * |------+------+------+------+------+------+-------------+------+------+------+------+------+------|
+   * |Adjust| Esc  | Alt  | GUI  | EISU |Lower |Space |Enter |Raise | KANA | Left | Down |  Up  |Right |
+   * `-------------------------------------------------------------------------------------------------'
+   */
+[_EUCALYN] = LAYOUT( \
+      KC_TAB,  KC_Q,   KC_W,    KC_COMM, KC_DOT, KC_SCLN,               KC_M,  KC_R, KC_D,    KC_Y,    KC_P,    KC_BSPC, \
+      KC_LCTL, KC_A,   KC_O,    KC_E,    KC_I,   KC_U,                  KC_G,  KC_T, KC_K,    KC_S,    KC_N,    KC_QUOT, \
+      KC_LSFT, KC_Z,   KC_X,    KC_C,    KC_V,   KC_F,                  KC_B,  KC_H, KC_J,    KC_L,    KC_SLSH, KC_RSFT, \
+      ADJUST,  KC_ESC, KC_LALT, KC_LGUI, EISU,   LOWER, KC_SPC, KC_ENT, RAISE, KANA, KC_LEFT, KC_DOWN, KC_UP, KC_RGHT \
       ),
 
   /* Lower
@@ -114,7 +134,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * ,-----------------------------------------.             ,-----------------------------------------.
    * |      | Reset|      |      |      |      |             |      |      |      |      |      |      |
    * |------+------+------+------+------+------|             |------+------+------+------+------+------|
-   * |      |Aud on|Audoff|MU TOG|MU MOD| Mac  |             | Win  |Qwerty|      |      |      |      |
+   * |      |Aud on|Audoff|MU TOG|MU MOD| Mac  |             | Win  |Qwerty| Euca |      |      |      |
    * |------+------+------+------+------+------|             |------+------+------+------+------+------|
    * |      |CK TOG|CK RST| CK UP|CK DWN|      |             |      |      |RGB ON| HUE+ | SAT+ | VAL+ |
    * |------+------+------+------+------+------+-------------+------+------+------+------+------+------|
@@ -123,7 +143,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    */
   [_ADJUST] =  LAYOUT( \
       _______, RESET,   _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
-      _______, AU_ON,   AU_OFF,  MU_TOG,  MU_MOD,  AG_NORM,                   AG_SWAP, QWERTY,  _______, _______, _______, _______, \
+      _______, AU_ON,   AU_OFF,  MU_TOG,  MU_MOD,  AG_NORM,                   AG_SWAP, QWERTY,  EUCALYN, _______, _______, _______, \
       _______, CK_TOGG, CK_RST,  CK_UP,   CK_DOWN, _______,                   _______, _______, RGB_TOG, RGB_HUI, RGB_SAI, RGB_VAI, \
       _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, RGB_SMOD,RGB_HUD, RGB_SAD, RGB_VAD \
       )
@@ -134,6 +154,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 #ifdef AUDIO_ENABLE
 
 float tone_qwerty[][2]     = SONG(QWERTY_SOUND);
+float tone_eucalyn[][2]    = SONG(COLEMAK_SOUND);
 float tone_plover[][2]     = SONG(PLOVER_SOUND);
 float tone_plover_gb[][2]  = SONG(PLOVER_GOODBYE_SOUND);
 float music_scale[][2]     = SONG(MUSIC_SCALE_SOUND);
@@ -168,6 +189,15 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
           PLAY_SONG(tone_qwerty);
         #endif
         persistent_default_layer_set(1UL<<_QWERTY);
+      }
+      return false;
+      break;
+    case EUCALYN:
+      if (record->event.pressed) {
+        #ifdef AUDIO_ENABLE
+          PLAY_SONG(tone_eucalyn);
+        #endif
+        persistent_default_layer_set(1UL<<_EUCALYN);
       }
       return false;
       break;
